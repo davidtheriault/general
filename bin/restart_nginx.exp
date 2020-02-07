@@ -1,0 +1,33 @@
+#!/usr/bin/expect
+
+# Written by David Theriault
+
+# script to make starting / restarting
+# nginx easier when it prompted for a pem pass phrase.
+# restart_nginx.exp passphrase [start]
+# 1st argument cert passphrase
+# 2nd argument start to start or will reload
+
+set timeout 10
+lassign $argv arg1 arg2
+set prompt "Enter PEM pass phrase:"
+if { $arg2 != "start" } {
+    puts "stopping\r"
+    spawn nginx -s stop;
+    expect {
+        $prompt {
+            send -- "$arg1\r"
+            exp_continue
+        }
+    }
+
+}
+puts "starting\r"
+spawn nginx;
+expect {
+    $prompt {
+        send -- "$arg1\r"
+        exp_continue
+    }
+}
+
