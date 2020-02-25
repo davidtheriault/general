@@ -10,6 +10,7 @@ Creates a new csv file with a new category column.
 import re
 import os
 import sys
+import argparse
 
 
 class Categorize:
@@ -19,22 +20,31 @@ class Categorize:
         categories = (
             ("Car",             ("BMW", "auto works", "Honda", 'rgstry','fee-boston', 'subaru')),
             ("Pet",             ("Stoneham animal", "\\bpet\\b", "VETERINARY",)),
-            ("Medical",         ("hospital", "pharmacy", "children's", "PEDIATRIC", "BIDMC", "fenway community", "dental", "walgreens", "chpa", "brostoff", "therapy", "doctors", "urgent care", "OTOLARYNGOLOGIC", "lahey", "funeral",)),
+            ("Medical",         ("hospital", "pharmacy", "children's", "PEDIATRIC", "BIDMC", "fenway community", "dental", "walgreens", "chpa",\
+                                 "therap", "doctors", "urgent care", "OTOLARYNGOLOGIC", "lahey", "funeral",)),
             ("Commute",	        ("mbta", "\\btoll\\b", "parking", "charlie", "rmv", "zpass", "city of boston par", "gapos", "congress st")),
             ("Donation",	("aclu", "wpy")),
-            ("Utility",	        ("wakefield municipal", 'wmgld')),
-            ("Fast Food",	("mcdonald", "burger", "panera", "grubhub", "five guys", "popeyes", "domino", "ice c", "cafe", "AUBONPAIN", "grabull", "common man so. irving", "Nick's", "vending", "dunkin", "taco", "concessio", "starbucks", "subway", "cosi",)),
+            ("Utility",	        ("wakefield municipal", 'wmgld', 'MA DPH')),
+            ("Fast Food",	("mcdonald", "burger", "panera", "grubhub", "five guys", "popeyes", "domino", "ice c", "cafe", "AUBONPAIN", \
+                           "grabull", "common man so. irving", "Nick's", "vending", "dunkin", "taco", "concessio", "starbucks", "subway", "cosi",)),
             ("Gas (unleaded)",	("\\bgas\\b", "exon", "mobil", "shell oil", "sunoco", "AL Prime", "gulf")),
-            ("Groceries",	("costco", "whole foods", "stop ", "shaws", "wholefds", "\\bmart\\b", "bakery", "cumberland farms", "farm land", "wine", "star market")),
-            ("Dining",	        ("seasons 52", "pizza", "restaurant", "gourmet","scholar", "MARGARITAS", "mexico lindo", "southern kin cookhou", "house of ", "diner", "top of the hub", "elephant", "steak", "kitchen", "chili", "roost", "millennium place", "the fours boston", "brick oven", '\\bbar\\b')),
+            ("Groceries",	("costco", "whole foods", "stop ", "shaws", "wholefds", "\\bmart\\b", "bakery", "cumberland farms", \
+                           "farm land", "wine", "star market")),
+            ("Dining",	        ("seasons 52", "pizza", "restaurant", "gourmet","scholar", "MARGARITAS", "mexico lindo", \
+                                "southern kin cookhou", "house of ", "diner", "top of the hub", "elephant", "steak", "kitchen", \
+                                "chili", "roost", "millennium place", "the fours boston", "brick oven", '\\bbar\\b')),
             ("Recreation",	("zoo", 'imax', 'theatre', 'park', "orchard", "busters", "cinema", "fandango", "golf", "\\bfarm\\b")),
-            ("Shopping",	("target", "amazon", "macy", "ikea", "amz", "old navy", "dick's", "payless", "party", "overstock", "wagon wheel", "carseat", "talbots", "staples", "Christmas", "cardstore", "michaels", "Prudential center", "memories in an instan", 'tjmax', 'rei')),
-            ("Media",	        ("apple", "hulu", "cbs", "verizon", "itunes", "comcast", "hbo", "showtime", "steam", "audible", "theimageconn", "eig", "book")),
-            ("Repairs",	        ("plumbing","unique indoor", "hart hdwe", "lowes", "home depot", "MICHAEL KEOHANE")),
+            ("Shopping",	("target", "amazon", "macy", "ikea", "amz", "old navy", "dick's", "payless", "party", \
+                          "overstock", "wagon wheel", "carseat", "talbots", "staples", "Christmas", "cardstore", \
+                          "michaels", "Prudential center", "memories in an instan", 'tjmax', 'rei', 'vistaprint',)),
+            ("Media",	        ("apple", "hulu", "cbs", "verizon", "itunes", "comcast", "hbo", "showtime", "steam", \
+                               "audible", "theimageconn", "eig", "book", "netflix", )),
+            ("Repairs",	        ("plumbing","unique indoor", "hart hdwe", "lowes", "home depot", )),
             ("Travel",          ("United ","tsa",)),
-            ("Nolas",	        ("self storage", 'ASSOC. CRED SERV.')),
-            ("Health",	        ("gym", "UHC motion", "fitness", "cbd", "barber", "pod", "salon", "tippy")),
+            ("Business",	("self storage", 'ASSOC. CRED SERV.', "linkedin",)),
+            ("Health",	        ("gym", "UHC motion", "fitness", "cbd", "barber", "pod", "salon", "tippy", "care",)),
             ("Furniture",       ("furniture", "smartmove", "wayfair" )),
+            #("Education",       ),
         )
 
         # chase left, custom right
@@ -48,14 +58,14 @@ class Categorize:
             "Gifts & Donations": "Donation",
             "Home": "Repairs",
             "Automotive":"Car",
-
+            "Education":"Education",
         }
 
         compiled_categories = {}
         order = []
         for entry in categories:
             category = entry[0]
-            if(self.DEBUG):
+            #if(self.DEBUG):
             phrases = entry[1]
             order.append(category)
             comp_str = '(' + ')|('.join(phrases) + ')'
@@ -108,8 +118,8 @@ class ProcessFile:
     # new columns
     NEW_HEADER  = "Trans Date,Trans Period,Description,Category,Amount\n"
 
-    def __init__(self, old_csv_filename, new_csv_filename=None):
-        self.DEBUG = False
+    def __init__(self, old_csv_filename, new_csv_filename=None, debug=False):
+        self.DEBUG = debug
         self.old_csv_filename = old_csv_filename
         self.new_csv_filename = new_csv_filename
         # TODO assert old filename exists
@@ -145,5 +155,12 @@ class ProcessFile:
         new_csv_fh.close()
     
 if __name__ == '__main__':
-   process_file = ProcessFile('chase.csv', 'chase_new.csv') 
-   process_file.process()
+    parser = argparse.ArgumentParser(description='Parse Chase Credit Card CSV')
+    parser.add_argument('-d', '--debug', action='store_true', help='run in debug mode')
+    parser.add_argument('-o', '--old_csv_filename', default='chase.csv', help='The filename to parse')
+    parser.add_argument('-n', '--new_csv_filename', default='new_chase.csv', help='The filename to output to, will overwrite if exists')
+    args = parser.parse_args()
+    send_args = vars(args)
+
+    process_file = ProcessFile(**send_args)
+    process_file.process()
