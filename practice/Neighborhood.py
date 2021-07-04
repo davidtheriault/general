@@ -8,7 +8,7 @@ a person will only move into a house if they have no
 adjacent neighbor.
 
 A possible pattern (E empty, O occupied) E O E O
-another patter  E E O E E O
+another pattern  E E O E E O
 
 Given an infinite street where people try to fill
 in all the houses following the above rules,
