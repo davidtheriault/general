@@ -1,4 +1,4 @@
-#!/usr/local/bin/python3
+#!/usr/bin/python3
 
 """
 Written by David Theriault
@@ -39,7 +39,7 @@ class Search:
             log_level = 'debug'
             print("Search, args:%s" % str(locals()))
         self.log = MyLogger(LOG_DIR, log_level, "search.py")
-        self.max_width = 40
+        self.max_width = 220
         self.phrase = phrase
         self.before=before
         self.after=after
@@ -49,7 +49,7 @@ class Search:
         reg_phrase = phrase
 
         ignore_dir = '.svn .cvs .git .snapshot .cache'
-        self.file_ex_list = 'jpg jpeg gif png tar zip gzip gz tgz pdf jar wav mp3 avi mpeg swp swx psd yml dll exe pdb pyc'
+        self.file_ex_list = 'jpg jpeg gif png tar zip gzip gz tgz pdf jar wav mp3 avi mpeg swp swx psd yml dll exe pdb pyc mov mp4'
        
         if(ignore_case):
             ignore_case = re.I
@@ -376,7 +376,7 @@ class Search:
         if(line_matches):
             self.num_file_match+=1
             header = "\n%sline matches:%d%s\t%smatches:%d%s\t%s%s%s" % \
-                    (Fore.CYAN, line_matches, Fore.RESET, Fore.CYAN, matches, Fore.RESET, Fore.GREEN, filename, Fore.RESET)
+                    (Fore.CYAN, line_matches, Fore.RESET, Fore.CYAN, matches, Fore.RESET, Fore.GREEN, filename.replace(' ', '\\ '), Fore.RESET)
             if(line_matches >= 30):
                 file_summary += header + "\n"
             # No need to print newline, file_summary will always end with a newline
